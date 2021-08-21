@@ -19,4 +19,4 @@ const insertData = async(tableName, data) => {
 
 }
 
-insertData('employeedata', { id: 3, name: 'Suhaib', surname: 'khan', age: 34, username: 'ahmad34', password: '343534' });
+// insertData('employeedata', { id: 3, name: 'Suhaib', surname: 'khan', age: 34, username: 'ahmad34', password: '343534' });

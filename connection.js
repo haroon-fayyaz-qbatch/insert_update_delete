@@ -1,3 +1,5 @@
+const process = require('process');
+
 const mysql = require('serverless-mysql')({
     config: {
         host: "localhost",
@@ -6,6 +8,10 @@ const mysql = require('serverless-mysql')({
         password: "",
         database: "employee1", // Add database name here
     }
+});
+
+process.on('exit', (code) => {
+    mysql.end();
 });
 
 
