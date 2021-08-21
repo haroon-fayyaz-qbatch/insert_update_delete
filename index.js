@@ -1,5 +1,6 @@
 const mysqlFunctions = require('./mysqlFunctions');
 const _ = require('lodash');
+const mysql = require('./connection');
 const logicalOperators = ['or', 'and'];
 const comparisonOperators = [{
     op: 'gt',
@@ -42,43 +43,84 @@ const insertData = async(tableName, data) => {
 
 }
 
-const deleteData = async(tableName, options) => {
-    const start = 'DELETE FROM ' + tableName + ' WHERE ';
+const buildQuery = async(options) => {
     let queryWithCols = '';
     for (const key in options.where) {
         if (logicalOperators.includes(key)) {
             for (const cols in options.where[key]) {
+                let count = 0;
+                if (Object.keys(options.where[key][cols]).length)
+                    queryWithCols += " (";
                 for (const operations in options.where[key][cols]) {
                     const index = _.findIndex(comparisonOperators, (operators) => operators.op === operations.toLowerCase());
                     if (index != -1) {
                         if (typeof options.where[key][cols][operations] === 'string')
-                            queryWithCols += cols + comparisonOperators[index].symbol + "'" + options.where[key][cols][operations] + "' " + key + " ";
+                            queryWithCols += " " + cols + comparisonOperators[index].symbol + "'" + options.where[key][cols][operations] + "' " + "AND";
                         else
-                            queryWithCols += cols + comparisonOperators[index].symbol + options.where[key][cols][operations] + " " + key + " ";
+                            queryWithCols += " " + cols + comparisonOperators[index].symbol + options.where[key][cols][operations] + " " + "AND";
                     } else
                         console.log("Invalid operator used")
                 }
+
+                queryWithCols = queryWithCols.substring(0, queryWithCols.lastIndexOf(" "));
+                if (Object.keys(options.where[key][cols]).length)
+                    queryWithCols += ") ";
+                queryWithCols += " " + key
             }
         } else {
             console.log('Invalid operator ', key, ', failed to process this query');
             return;
         }
+        queryWithCols = queryWithCols.substring(0, queryWithCols.lastIndexOf(" "));
+        return queryWithCols;
 
-        console.log(queryWithCols.substring(0, queryWithCols.lastIndexOf(" ")));
     }
 }
 
-// insertData('employeedata', { id: 3, name: 'Suhaib', surname: 'khan', age: 34, username: 'ahmad34', password: '343534' });
+const deleteData = async(tableName, options) => {
+    const start = 'DELETE FROM ' + tableName + ' WHERE ';
+    mysqlFunctions.delete(start + await buildQuery(options))
+}
 
-deleteData('employeedata', {
+const updateData = async(tableName, data, options) => {
+    const start = 'UPDATE ' + tableName + ' SET ';
+    const where = " WHERE " + await buildQuery(options);
+    let updateData = '';
+    for (const key in data) {
+        updateData += " " + key + '=';
+        if (typeof data[key] === 'string') {
+            updateData += "'" + data[key] + "' ,";
+        } else
+            updateData += data[key] + " ,";
+    }
+    updateData = updateData.substring(0, updateData.lastIndexOf(" "));
+    mysqlFunctions.update(start + updateData + where);
+}
+
+
+// insertData('employeedata', { id: 2, name: 'Suhaib', surname: 'khan', age: 34, username: 'ahmad34', password: '343534' });
+
+updateData('employeedata', { name: 'Suhaib', surname: 'Ahmad' }, {
     where: {
         or: {
             id: {
-                eq: 3,
+                eq: 2,
             },
-            name: {
-                eq: 'Ahmad'
-            }
         }
     }
 });
+
+
+// deleteData('employeedata', {
+//     where: {
+//         or: {
+//             id: {
+//                 eq: 3,
+//                 // gt: 4,
+//             },
+//             name: {
+//                 eq: 'Ahmad'
+//             }
+//         }
+//     }
+// });
