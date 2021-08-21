@@ -18,6 +18,7 @@
   "homepage": "https://github.com/haroon-fayyaz-qbatch/insert_update_delete#readme",
   "dependencies": {
     "dotenv": "^10.0.0",
+    "lodash": "^4.17.21",
     "serverless-mysql": "^1.5.4"
   }
 }
