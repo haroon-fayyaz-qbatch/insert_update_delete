@@ -79,7 +79,9 @@ const buildQuery = async(options) => {
 
 const deleteData = async(tableName, options) => {
     const start = 'DELETE FROM ' + tableName + ' WHERE ';
-    mysqlFunctions.delete(start + await buildQuery(options))
+    const query = start + await buildQuery(options);
+    console.log(query);
+    mysqlFunctions.delete(start + await buildQuery(options));
 }
 
 const updateData = async(tableName, data, options) => {
@@ -94,13 +96,15 @@ const updateData = async(tableName, data, options) => {
             updateData += data[key] + " ,";
     }
     updateData = updateData.substring(0, updateData.lastIndexOf(" "));
-    mysqlFunctions.update(start + updateData + where);
+    const query = start + updateData + where;
+    console.log(query);
+    mysqlFunctions.update(query);
 }
 
 
-// insertData('employeedata', { id: 2, name: 'Suhaib', surname: 'khan', age: 34, username: 'ahmad34', password: '343534' });
+insertData('employeedata', { id: 3, name: 'Saleem', surname: 'khan', age: 35, username: 'saleem34', password: '34334' });
 
-updateData('employeedata', { name: 'Suhaib', surname: 'Ahmad' }, {
+updateData('employeedata', { name: 'Shafeeq', surname: 'Ahmad' }, {
     where: {
         or: {
             id: {
@@ -111,16 +115,12 @@ updateData('employeedata', { name: 'Suhaib', surname: 'Ahmad' }, {
 });
 
 
-// deleteData('employeedata', {
-//     where: {
-//         or: {
-//             id: {
-//                 eq: 3,
-//                 // gt: 4,
-//             },
-//             name: {
-//                 eq: 'Ahmad'
-//             }
-//         }
-//     }
-// });
+deleteData('employeedata', {
+    where: {
+        or: {
+            id: {
+                eq: 2,
+            },
+        }
+    }
+});
